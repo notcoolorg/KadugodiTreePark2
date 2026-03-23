@@ -1,0 +1,344 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: Scotland Yard Multiplayer Game API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: games
+    description: Game management
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /games:
+    post:
+      operationId: createGame
+      tags: [games]
+      summary: Create a new game room
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateGameBody"
+      responses:
+        "201":
+          description: Game created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Game"
+
+  /games/{roomCode}:
+    get:
+      operationId: getGame
+      tags: [games]
+      summary: Get game state
+      parameters:
+        - name: roomCode
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Game state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Game"
+        "404":
+          description: Game not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /games/{roomCode}/join:
+    post:
+      operationId: joinGame
+      tags: [games]
+      summary: Join a game room
+      parameters:
+        - name: roomCode
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JoinGameBody"
+      responses:
+        "200":
+          description: Joined game
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Game"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Game not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /games/{roomCode}/start:
+    post:
+      operationId: startGame
+      tags: [games]
+      summary: Start the game
+      parameters:
+        - name: roomCode
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StartGameBody"
+      responses:
+        "200":
+          description: Game started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Game"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /games/{roomCode}/move:
+    post:
+      operationId: makeMove
+      tags: [games]
+      summary: Make a move
+      parameters:
+        - name: roomCode
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MakeMoveBody"
+      responses:
+        "200":
+          description: Move made
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Game"
+        "400":
+          description: Invalid move
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    CreateGameBody:
+      type: object
+      properties:
+        playerName:
+          type: string
+        role:
+          type: string
+          enum: [mrx, detective]
+      required:
+        - playerName
+        - role
+
+    JoinGameBody:
+      type: object
+      properties:
+        playerName:
+          type: string
+        role:
+          type: string
+          enum: [mrx, detective]
+      required:
+        - playerName
+        - role
+
+    StartGameBody:
+      type: object
+      properties:
+        playerId:
+          type: string
+      required:
+        - playerId
+
+    MakeMoveBody:
+      type: object
+      properties:
+        playerId:
+          type: string
+        toStation:
+          type: integer
+        transport:
+          type: string
+          enum: [taxi, bus, underground, black]
+      required:
+        - playerId
+        - toStation
+        - transport
+
+    Player:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        role:
+          type: string
+          enum: [mrx, detective]
+        position:
+          type: ["integer", "null"]
+        tickets:
+          $ref: "#/components/schemas/Tickets"
+        isConnected:
+          type: boolean
+      required:
+        - id
+        - name
+        - role
+        - position
+        - tickets
+        - isConnected
+
+    Tickets:
+      type: object
+      properties:
+        taxi:
+          type: integer
+        bus:
+          type: integer
+        underground:
+          type: integer
+        black:
+          type: integer
+      required:
+        - taxi
+        - bus
+        - underground
+        - black
+
+    MrXMove:
+      type: object
+      properties:
+        round:
+          type: integer
+        transport:
+          type: string
+        station:
+          type: ["integer", "null"]
+      required:
+        - round
+        - transport
+        - station
+
+    Game:
+      type: object
+      properties:
+        id:
+          type: string
+        roomCode:
+          type: string
+        status:
+          type: string
+          enum: [lobby, playing, mrx_won, detectives_won]
+        players:
+          type: array
+          items:
+            $ref: "#/components/schemas/Player"
+        currentTurn:
+          type: ["string", "null"]
+        round:
+          type: integer
+        maxRounds:
+          type: integer
+        mrxRevealRounds:
+          type: array
+          items:
+            type: integer
+        mrxMoveLog:
+          type: array
+          items:
+            $ref: "#/components/schemas/MrXMove"
+        turnOrder:
+          type: array
+          items:
+            type: string
+        turnIndex:
+          type: integer
+        winner:
+          type: ["string", "null"]
+        mrxStartQuarter:
+          type: ["integer", "null"]
+        decoyQuarter:
+          type: ["integer", "null"]
+      required:
+        - id
+        - roomCode
+        - status
+        - players
+        - currentTurn
+        - round
+        - maxRounds
+        - mrxRevealRounds
+        - mrxMoveLog
+        - turnOrder
+        - turnIndex
+        - winner

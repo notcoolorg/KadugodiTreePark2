@@ -1,0 +1,16 @@
+packages:
+  "framer-motion": "For smooth UI animations, turn transitions, and map token movement"
+  "clsx": "Utility for conditionally joining classNames"
+  "tailwind-merge": "Utility for merging tailwind classes without style conflicts"
+  "lucide-react": "Already in stack, but ensuring it's available for UI icons"
+
+images:
+  - path: "artifacts/scotland-yard/public/images/london-fog-bg.png"
+    description: "Dark, atmospheric illustration of a foggy 19th century London street at night, cobblestones, gas lamps, silhouette in the distance, deep navy and charcoal tones, mystery thriller vibe"
+    aspect_ratio: "16:9"
+
+notes:
+  - WebSocket assumes standard browser environment, connects to /api/ws
+  - Uses localStorage for player session persistence (playerId, playerName)
+  - Game logic relies heavily on server state, UI reflects current valid moves
+  - Map connections are a hardcoded subset for a playable demo
