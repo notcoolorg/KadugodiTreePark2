@@ -89,7 +89,7 @@ export async function handlePlayerDisconnect(roomCode: string, playerId: string)
       return;
     }
 
-    let newStatus = game.status;
+    let newStatus: GameState['status'] = game.status;
     let winner = game.winner;
 
     if (disconnectedPlayer.role === 'mrx') {

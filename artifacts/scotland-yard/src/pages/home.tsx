@@ -31,10 +31,11 @@ function useElapsedTimer(running: boolean) {
         setElapsed(Math.floor((Date.now() - startRef.current!) / 1000));
       }, 1000);
       return () => clearInterval(id);
-    } else {
-      startRef.current = null;
-      setElapsed(0);
     }
+
+    startRef.current = null;
+    setElapsed(0);
+    return;
   }, [running]);
 
   return elapsed;

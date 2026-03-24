@@ -361,7 +361,7 @@ router.delete("/games/:roomCode/players/:targetPlayerId", async (req, res): Prom
   }
 
   let updatedPlayers = game.players.filter(p => p.id !== targetPlayerId);
-  let newStatus      = game.status;
+  let newStatus: GameState['status'] = game.status;
   let winner         = game.winner;
   let currentTurn    = game.currentTurn;
   let turnOrder      = game.turnOrder.filter(id => id !== targetPlayerId);

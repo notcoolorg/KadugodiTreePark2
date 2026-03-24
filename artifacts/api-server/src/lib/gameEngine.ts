@@ -216,9 +216,14 @@ export function applyMove(
     }
 
     // Deduct ticket (boat is free — no ticket cost)
-    const updatedTickets: Tickets = transport === 'boat'
-      ? player.tickets
-      : { ...player.tickets, [transport]: (player.tickets as Record<string, number>)[transport] - 1 } as Tickets;
+    let updatedTickets: Tickets = player.tickets;
+    if (transport !== 'boat') {
+      const ticketType = transport as Exclude<keyof Tickets, 'boat'>;
+      updatedTickets = {
+        ...player.tickets,
+        [ticketType]: player.tickets[ticketType] - 1,
+      };
+    }
     newPlayers[playerIdx] = { ...player, position: toStation, tickets: updatedTickets };
 
     // Detectives' tickets (taxi/bus/underground) are given to Mr. X
